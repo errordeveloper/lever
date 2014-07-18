@@ -1,0 +1,10 @@
+[package]
+
+name = "lever"
+version = "0.0.1"
+authors = [ "errordeveloper@gmail.com" ]
+
+[[bin]]
+
+name = "lever"
+path = "src/main.rs"
