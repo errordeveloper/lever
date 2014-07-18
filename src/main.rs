@@ -9,6 +9,7 @@ use std::io::net::tcp::{TcpListener};
 use std::io::{Acceptor, Listener};
 use std::io::BufferedStream;
 use std::io::net::ip::SocketAddr;
+use std::collections::HashMap;
 
 #[start]
 fn start(argc: int, argv: *const *const u8) -> int {
@@ -24,6 +25,12 @@ enum Command {
   UpdatePeerTable(PeerState, SocketAddr),
 }
 
+struct PeerInfo {
+  conn: bool,
+  seen: u64,
+  gone: u64,
+}
+
 fn main() {
   let listener = TcpListener::bind("127.0.0.1", 9000);
   let mut acceptor = listener.listen();
@@ -31,15 +38,24 @@ fn main() {
   let (tx, rx): (Sender<Command>, Receiver<Command>) = channel();
 
   spawn(proc() {
+    let mut peers: HashMap<SocketAddr, PeerInfo> = HashMap::new();
     loop {
       match rx.recv() {
         UpdatePeerTable(Accepted, addr) => {
-          info!("Seen {}:{}", addr.ip, addr.port)
+          peers.insert_or_update_with(addr,
+              PeerInfo { conn: true, seen: 1, gone: 0 },
+              |_, v| { v.conn = true; v.seen += 1; });
+          info!("Seen {}:{}", addr.ip, addr.port);
         },
         UpdatePeerTable(Closed, addr) => {
-          info!("Gone {}:{}", addr.ip, addr.port)
+          info!("Gone {}:{}", addr.ip, addr.port);
+          // This shouldn't insert, but we could use `find_with_or_insert_with`
+          peers.insert_or_update_with(addr,
+              PeerInfo { conn: false, seen: 0, gone: 0 },
+              |_, v| { v.conn = false; v.gone += 1; });
         },
       }
+      debug!("peers={}", peers.len());
     }
   });
 
