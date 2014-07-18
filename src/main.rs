@@ -8,7 +8,7 @@ extern crate debug;
 use std::io::net::tcp::{TcpListener};
 use std::io::{Acceptor, Listener};
 use std::io::BufferedStream;
-use std::io::net::ip::IpAddr;
+use std::io::net::ip::SocketAddr;
 
 #[start]
 fn start(argc: int, argv: *const *const u8) -> int {
@@ -21,7 +21,7 @@ enum PeerState {
 }
 
 enum Command {
-  UpdatePeerTable(PeerState, IpAddr, u16),
+  UpdatePeerTable(PeerState, SocketAddr),
 }
 
 fn main() {
@@ -32,20 +32,16 @@ fn main() {
 
   spawn(proc() {
     loop {
-      let command = rx.recv();
-      debug!("{:?}", command);
-      match command {
-        UpdatePeerTable(Accepted, ip, port) => {
-          info!("Seen {}:{}", ip, port)
+      match rx.recv() {
+        UpdatePeerTable(Accepted, addr) => {
+          info!("Seen {}:{}", addr.ip, addr.port)
         },
-        UpdatePeerTable(Closed, ip, port) => {
-          info!("Gone {}:{}", ip, port)
+        UpdatePeerTable(Closed, addr) => {
+          info!("Gone {}:{}", addr.ip, addr.port)
         },
       }
     }
   });
-
-
 
   for stream in acceptor.incoming() {
     let command = tx.clone();
@@ -54,14 +50,13 @@ fn main() {
         Ok(conn) => {
           let mut stream = conn;
           let peer = stream.peer_name().unwrap();
-          command.send(UpdatePeerTable(Accepted, peer.ip, peer.port));
-          //debug!("{:?}", stream);
+          command.send(UpdatePeerTable(Accepted, peer));
           let stream = stream;
           let mut echo = BufferedStream::new(stream);
           loop {
             match echo.read_line() {
               Ok(data) => {
-                match echo.write(data.as_bytes()) {
+                let _ = match echo.write(data.as_bytes()) {
                   Ok(_) => echo.flush(),
                   Err(e) => {
                     error!("{}", e);
@@ -75,7 +70,7 @@ fn main() {
               },
             }
           }
-          command.send(UpdatePeerTable(Closed, peer.ip, peer.port));
+          command.send(UpdatePeerTable(Closed, peer));
         },
         Err(e) => error!("{}", e),
       }
