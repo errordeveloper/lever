@@ -1,8 +1,6 @@
 #![feature(phase)]
 #[phase(plugin, link)] extern crate log;
 
-extern crate rustuv;
-extern crate green;
 extern crate debug;
 
 extern crate serialize;
@@ -25,11 +23,6 @@ struct LeverOpts {
 }
 
 hammer_config!(LeverOpts "Lever is an echo server for TCP tuning")
-
-#[start]
-fn start(argc: int, argv: *const *const u8) -> int {
-  green::start(argc, argv, rustuv::event_loop, main)
-}
 
 enum PeerState {
   Accepted,
