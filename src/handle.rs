@@ -18,7 +18,7 @@ fn main() {
           let mut echo = BufferedStream::new(conn);
           loop {
             let x = Uuid::new_v4().to_urn_str();
-            debug!("{}", x);
+            std::io::timer::sleep(1000);
             let _ = match echo.write(x.as_bytes()) {
               Ok(_) => echo.flush(),
               Err(e) => {
