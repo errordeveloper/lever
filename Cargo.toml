@@ -13,3 +13,8 @@ path = "src/lever.rs"
 
 name = "handle"
 path = "src/handle.rs"
+
+[dependencies.hammer]
+
+version = "0.1.0"
+git = "https://github.com/wycats/hammer.rs"

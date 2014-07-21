@@ -5,11 +5,26 @@ extern crate rustuv;
 extern crate green;
 extern crate debug;
 
+extern crate serialize;
+#[phase(plugin, link)]
+extern crate hammer;
+
 use std::io::net::tcp::TcpListener;
 use std::io::{Acceptor, Listener};
 use std::io::BufferedStream;
 use std::io::net::ip::{SocketAddr, IpAddr};
 use std::collections::{HashMap, HashSet};
+
+use std::os;
+use hammer::decode_args;
+
+#[deriving(Decodable, Show)]
+struct LeverOpts {
+  host: Option<String>,
+  port: Option<u16>,
+}
+
+hammer_config!(LeverOpts "Lever is an echo server for TCP tuning")
 
 #[start]
 fn start(argc: int, argv: *const *const u8) -> int {
@@ -38,7 +53,20 @@ struct StatsInfo {
 }
 
 fn main() {
-  let listener = TcpListener::bind("127.0.0.1", 9000);
+  let opts: LeverOpts = decode_args(os::args().tail()).unwrap();
+  let host: String =
+    match opts.host {
+      None => "127.0.0.1".to_string(),
+      Some(h) => h,
+    };
+  let port: u16 =
+    match opts.port {
+      None => 9000,
+      Some(p) => p,
+    };
+  debug!("Setting up Lever on {}:{}", host, port);
+
+  let listener = TcpListener::bind(host.as_slice(), port);
   let mut acceptor = listener.listen();
 
   let (tx, rx): (Sender<Command>, Receiver<Command>) = channel();
