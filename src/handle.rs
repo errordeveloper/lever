@@ -54,7 +54,6 @@ fn main() {
         Ok(conn) => {
           info!("Connected client #{}!", t);
           let id = format!("{}@{}", t, x);
-          debug!("{}", id);
           let mut echo = BufferedStream::new(conn);
           loop {
             std::io::timer::sleep(1000);
