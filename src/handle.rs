@@ -56,7 +56,7 @@ fn main() {
           let id = format!("{}@{}", t, x);
           let mut echo = BufferedStream::new(conn);
           loop {
-            std::io::timer::sleep(1000);
+            std::io::timer::sleep(5000);
             let _ = match echo.write(id.as_bytes()) {
               Ok(_) => echo.flush(),
               Err(e) => {
@@ -67,6 +67,7 @@ fn main() {
           }
         },
       }
+      std::io::timer::sleep(500);
     });
   }
 }
