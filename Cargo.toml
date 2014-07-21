@@ -7,9 +7,9 @@ authors = [ "errordeveloper@gmail.com" ]
 [[bin]]
 
 name = "lever"
-path = "src/main.rs"
+path = "src/lever.rs"
 
 [[bin]]
 
 name = "handle"
-path = "src/test.rs"
+path = "src/handle.rs"
