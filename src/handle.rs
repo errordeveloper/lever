@@ -44,18 +44,21 @@ fn main() {
     };
   debug!("Connecting {} handle to Lever on {}:{}", threads, host, port);
 
+  let x = Uuid::new_v4().to_urn_str();
   for t in range(0u, threads) {
     let (host, port) = (host.clone(), port.clone());
+    let x = x.clone();
     spawn(proc() {
       match TcpStream::connect(host.as_slice(), port) {
         Err(e) => error!("{}", e),
         Ok(conn) => {
           info!("Connected client #{}!", t);
+          let id = format!("{}@{}", t, x);
+          debug!("{}", id);
           let mut echo = BufferedStream::new(conn);
-          let x = Uuid::new_v4().to_urn_str();
           loop {
             std::io::timer::sleep(1000);
-            let _ = match echo.write(x.as_bytes()) {
+            let _ = match echo.write(id.as_bytes()) {
               Ok(_) => echo.flush(),
               Err(e) => {
                 error!("{}", e);
