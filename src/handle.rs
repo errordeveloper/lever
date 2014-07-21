@@ -52,8 +52,8 @@ fn main() {
         Ok(conn) => {
           info!("Connected client #{}!", t);
           let mut echo = BufferedStream::new(conn);
+          let x = Uuid::new_v4().to_urn_str();
           loop {
-            let x = Uuid::new_v4().to_urn_str();
             std::io::timer::sleep(1000);
             let _ = match echo.write(x.as_bytes()) {
               Ok(_) => echo.flush(),
