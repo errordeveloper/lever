@@ -5,7 +5,7 @@ extern crate rustuv;
 extern crate green;
 extern crate debug;
 
-use std::io::net::tcp::{TcpListener};
+use std::io::net::tcp::TcpListener;
 use std::io::{Acceptor, Listener};
 use std::io::BufferedStream;
 use std::io::net::ip::SocketAddr;

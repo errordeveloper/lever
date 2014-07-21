@@ -8,3 +8,8 @@ authors = [ "errordeveloper@gmail.com" ]
 
 name = "lever"
 path = "src/main.rs"
+
+[[bin]]
+
+name = "handle"
+path = "src/test.rs"
