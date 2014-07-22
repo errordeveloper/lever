@@ -1,6 +1,7 @@
 #![feature(phase)]
 #[phase(plugin, link)] extern crate log;
 
+extern crate uuid;
 extern crate debug;
 
 extern crate serialize;
@@ -109,6 +110,8 @@ fn main() {
 
   for stream in acceptor.incoming() {
     let command = tx.clone();
+    let x = uuid::Uuid::new_v4().to_urn_str();
+    let l = x.len();
     spawn(proc() {
       match stream {
         Ok(conn) => {
@@ -116,7 +119,7 @@ fn main() {
           let peer = stream.peer_name().unwrap();
           command.send(UpdatePeerTable(Accepted, peer));
           let stream = stream;
-          let mut echo = BufferedStream::new(stream);
+          let mut echo = BufferedStream::with_capacities(l, l, stream);
           loop {
             match echo.read_line() {
               Ok(data) => {

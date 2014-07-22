@@ -48,13 +48,14 @@ fn main() {
   for t in range(0u, threads) {
     let (host, port) = (host.clone(), port.clone());
     let x = x.clone();
+    let l = x.len();
     spawn(proc() {
       match TcpStream::connect(host.as_slice(), port) {
         Err(e) => error!("{}", e),
         Ok(conn) => {
           info!("Connected client #{}!", t);
           let id = format!("{}@{}", t, x);
-          let mut echo = BufferedStream::new(conn);
+          let mut echo = BufferedStream::with_capacities(l, l, conn);
           loop {
             std::io::timer::sleep(5000);
             let _ = match echo.write(id.as_bytes()) {
